@@ -1,0 +1,1461 @@
+# betterr.github.io
+<html >
+<head>
+
+</head>
+<body>
+云计算
+
+
+第一周
+
+
+DAY1基础命令
+在企业里怎么连接服务器和交换机，及windows服务器。
+
+
+
+1、连接linux服务器
+ xshell  putty mac笔记本终端
+ ssh 跳板机(通道机，堡垒机)
+ 通道机就是一台linux服务器，进行登录用户的身份校验
+通道机上ssh服务器IP地址
+
+在企业里怎能管理服务器及交换机的IP地址?
+在公司中服务器realserver和交换机 switch,都是静态IP地址，不会变。一般通过公司
+资产管理系统（CMDB系统），小公司一般用excel表格
+
+
+
+cp xx xx 拷贝文件
+mv xx xx 移动文件
+set nu 显示行号   set nonu 取消显示行号
+set list 显示文件中空格，空行
+vi  编辑文件 a,i,o
+dd 删除行 
+3dd 删除光标下面三行
+yy  复制文件某一行
+3yy  复制光标下面三行
+set nu +行号 定位某一行
+G 定位到最后一行
+gg 定位到首行
+dG ：删除光标到最后一行
+u 还原上一步操作
+head /etc/passwd >passwd   打印文件passwd前10行到新文件passwd
+：/关键字   n   查找关键字
+:s/root/ROOT/ 替换光标所在行
+s/root/ROOT/g 整行替换
+ 1,2 s/root/ROOT/g 替换1-2行
+%s/root/ROOT/g  全部替换
+3,$ s/ROOT/root/g 替换第三行至末尾行
+man 查看帮助
+cat  /etc/redhat-release   查看本机操作系统版本
+du -sh 文件名  查看文件大小
+echo $?    命令返回值   0 正常  1 有错误
+yum -y install net-tools
+ netstat -tnlp |grep ssh   查看端口
+  du -sh
+
+查看文件
+
+cat 由第一行开始显示
+tac 从最后一行开始显示
+nl 显示的时候。同时输出行号
+more  一页一页的查看文件内容
+less
+head 只看前几行 -20
+tail 只看最后几行 -n 20
+od 以二进制的方式读取文件内容
+
+
+
+作业一
+1 请在/tmp下创建a.txt  b.txt  c.txt  e.txt文件
+2 请在/tmp下创建 1.txt 2.txt 3.txt目录
+4 请在 /tmp创建 并删除 * 文件
+5  练习tab键补全目录     
+6 使用什么命令远程连接到服务器？使用的什么端22
+7 你操作的服务器是什么操作系统版本?
+centos7
+8 如果虚拟机远程连接失败，你怎么操作？
+9 删除命令 rm   -rf    分别是什么意思？
+10 清屏
+11   终止当前命令行的命令
+12   查看当前目录路径
+13 绝对路径和相对路径区别？
+14 你使用绝对路径还是相对路径删除文件？ 为什么？
+15 你安装的linux操作系统有桌面么？ 企业中为什么不使用桌面的linux系统
+16 怎么查看ip 地址？
+17 想使用曾经输入过的命令按什么？
+18 说说你知道的linux系统下有什么目录？
+19 系统下配置文件目录在哪里？
+20 如果机器被删根了。你怎么做？？
+作业一
+
+再装一台linux服务器，在A机器上登录B机器，然后对B进行操作。
+
+
+
+作业二
+1 请将 /etc/sysconfig/network-scripts  下的ifcfg-ens33  备份到/tmp下重命名为ifcfg-ens33.bak
+
+2 请将/etc/passwd 文件备份到/下
+3 在/root 下创建 yang1--yang10 10个文件
+将这10个文件移动到/tmp下
+4 在 / 下创建yang5   将yang5移动到/tmp下，如果遇到名称一样，请停止操作
+5在tmp下  创建 haha1--haha10 这10个目录。然后将haha1--haha5删除。
+6将 /etc/passwd  前10行   写入到/tmp/passwd 中    然后进行全局替换
+所有root 换成ROOT     第一个ROOT 换成小root    3-5行的root 换成bin
+
+8 执行 head /etc/passwd > /tmp/passwd 命令   然后进入/tmp/passwd 文件 
+9把这10行文件中   的sbin 都换成 SBIN
+10把第5行到最后的  root换成ROOT   （没有root 自己做一个文件）
+11 显示行号  取消行号  显示空行
+12 将/tmp/passwd   第一个root 换成 hahaha
+13 光标进入第3行
+14 将/tmp/passwd 文件  3-5行复制到文件最后。  练习 yy  dd   3yy  3dd
+15 光标移动到最后 和 第一个
+
+
+
+DAY2提权和安全加固
+centos6.x 版本系统和centos7.x版本的区别
+
+7.0版本是一个分界线
+1、内核版本
+2、启动加载器
+3、防火墙  iptables和firewalld
+4、默认数据库  mysql和mariadb
+5、文件结构
+6、主机名
+7、服务相关  service和systemtcl
+  service network restart
+  systemctl  restart network
+
+   
+
+sudo提权过程
+
+1.拥有超级权限的同事，首先进行服务器账号添加，给你添加一个普通用户
+
+id 账号 查看账号是否添加成功
+拥有超级权限的同事要给这个普通账号提权让普通用户拥有root权限
+
+账号添加失败原因：
+
+1、遗留了普通用户的家目录和邮箱  /home   /var/spool/mail  /etc/passwd /etc/shadow
+2、没有权限
+3、磁盘空间满，无法创建文件
+4、磁盘故障 查看磁盘空间  df -h
+5、
+
+useradd   添加用户
+userdel -r 删除用户
+groupadd 添加组   vi  /etc/group  查看组
+groupdel  删除组
+usermod    组 用户       添加用户到组   -G 覆盖原有组   -aG  添加新附加组
+id   用户名                 查看组
+gpasswd -a 用户 组   组中添加组成员
+gpasswd -d 用户 组   组中删除组成员
+vi  /etc/sudoers  102行  yy G p 提权  sudo su -
+
+
+员工离职工程师应该做什么？
+
+1、首先删除通道机登录权限
+2、删除CMDB系统或者表格中服务器管理员名字。将服务器过户到同组人员
+3、删除所有服务器登录权限，及sudoers文件中的内容
+4、联系邮箱管理员删除邮箱
+
+
+
+ll -d                      查看文件夹权限
+ll                          查看文件文件 
+chown 用户 文件   修改文件属主
+chgrp   组    文件   修改文件属组
+chmod 777  文件    修改文件权限
+useradd 用户 -G 组   添加新用户到组
+root 的UID  GID  0 0
+ 
+ 
+ 修改端口步骤：
+ systemctl stop firewalld                                关闭防火墙
+ setenforce  0                                                临时关闭策略
+ vi /etc/selinux/config   enforceing=disabled   永久关闭策略
+ vi /etc/ssh/sshd_config                                 进入配置文件找到Port 22  修改端口
+ systemctl restart sshds                                 重启服务
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+作业三
+1创建用户jack和tom属于hr，wc组
+2创建用户tony，属于hr组，并且将tony的密码修改为 qianfeng  。
+3  账号添加  组添加  账号删除 组删除用什么命令？
+4 给同桌提权
+5 将jack 属于hr wc 组  现在人员调动，请删除服务器相关【所有信息】  请问你都删什么？
+6 tom 现在属于wc组，现在升职了，请添加 it fd组。
+7 账号添加不上是什么原因
+8 你在企业里使用过什么操作系统？具体版本？请说出多个。  
+9  dhcp 是什么？
+10 给服务器添加2个账号 xiaozhang  xiaoli  查看
+/etc/passwd  /etc/shadow/ /home/   /var/spool/mail/变化
+11 通过命令 userdel 删除xiaozhang
+（不是userdel -r）。随后查看xiaozhang是否被删除？
+继续输入useradd xiaozhang  用户是否
+能被添加上？？ 添加不上要怎么做？
+12通过一条命令直接删除用户所有信息。
+13 xiaowang 可以进入到其他用户的家目录及root的家目录么？
+14 修改普通用户xiaowang 和root的密码
+15怎么判断一个账户是否存在？？
+16如果VM 通过SSH连接不上了 ，下一步要怎么做？
+17 如果一台服务器没有IP地址了要怎么做？
+18 /etc/passwd   第二段是干什么的？以什么分割？
+19 在centos7.0系统怎么重启ssh服务
+20 你用过什么虚拟化产品？ 
+21 请将zhangsan用户添加到it  hr  组内
+22 添加普通用户zhangsan  要求不用root密码   能够执行root权限（提权）
+23 你为什么要修改SSH的默认端口？？怎么修改的 说出过程
+
+DAY3属性和进程
+
+
+主要目的是为了方便我们为网络中大量的主机分配IP地址
+一个局域网内不可配置多台DHCP服务器。只能有一个
+
+专业术语及架构
+client：客户端
+cdn：加速：内容分发网络
+firewall：防火墙
+wiki：多人协作的协作系统
+dr：负载均衡器
+pxe服务器：批量安装操作系统，初始化服务器
+ansible：统一部署
+zabbix：监控服务器
+ELK 开元实施日志分析平台
+ips：入侵防御系统
+CMDB:   资产管理系统
+server 服务端
+
+作业、
+设置防火墙开机自动关闭
+systemctl disabled firewalld
+作业
+禁止root用户远程登录，只能使用普通用户登录
+1、vi /etc/passwd/    root  /bin/nologin
+2、vi /etc/ssh/sshd_config PermitRootLogin no
+
+
+
+服务器被入侵的症状
+
+  被入侵的服 务器会消耗非常高的资源，尤其是CPU等，可以利用此机器挖矿，发送垃圾邮件，消耗带宽发DOS攻击。
+表现：服务器非常慢。跑的网页的话，网站打开缓慢
+
+被黑客入侵机器，如何做？
+
+w 查看当前有谁登录在服务器上
+last 查看谁曾经登录过服务器
+回顾一下历史命令。查看黑客执行了什么
+vim    ~/.bash_history   ls -a 显示隐藏文件
+如果被删了了。检查机器
+检查哪些进程消耗cpu.--sort
+检查网络连接
+马上安全加固
+修改SSH端口及禁止root远程登录，pkill -u kill -9
+
+
+文件属性
+
+chatter     +（-）属性    + 文件名      修改文件属性
+lsatter      文件名                              查看文件属性
+a 只能对文件追加不能修改
+i  不能对文件做任何修改
+echo “文字” >文件名      覆盖
+echo “文字” >>文件名    追加
+
+suid   针对文件
+
+chmod u+s 命令路径 用命令对文件操作
+
+sgid   针对目录
+
+chmod g+s 路径      在目录下创建文件继承该目录属组
+
+sticky 针对目录
+
+chmod o+t 目录   用户只能删除自己的文件
+
+
+一、登录windows服务器
+      1、远程桌面
+二、登录交换机及服务器
+      1、ssh交换机的跳板机（linux服务器）
+      2、使用telnet  ip 地址
+
+进程
+top                  动态实时显示机器负载进程信息(两部分1.整体负载2.细节负载)
+ps aux |less      静态显示进程信息
+ps -ef               静态显示进程信息
+ps aus |grep sshd  过滤显示SSH服务进程信息
+ps aus |grep sshd  过滤显示SSH服务进程信息
+load  average   0.1 0.01 0.22   1 ，5 ，15分钟CPU平均负载变化
+tail  -参数            由后-前显示
+head -参数           由前-后显示
+less             分页显示
+kill -9 PID    结束进程
+pkill -u 用户名   结束用户下所有进程
+killall +服务名    安装命令 yum -y install+·····
+lsof -i:22   查看端口  yum -y install lsof
+ps aus --sort -%cpu     降序显示CPU使用率
+ps aus --sort -%mem    降序显示内存使用率
+
+
+
+
+
+
+DAY4分区和RAID
+
+ping -c 10000 -i 0.001 ip地址
+
+
+
+
+
+如何判断服务区是否丢包？及丢包率{必须登录服务器去ping网关}
+网关x.x.x.1
+
+本地ping服务器IP地址进行连通性测试，如果网络有问题一定会丢包，但是服务器网络不一定有问题。所以要登录服务器上，在realserver上去ping网关，真正的判断丢包率
+
+
+
+查看防火墙状态
+ systemctl status firewalld
+ active   incative
+ systemctl disable firewalld  防火墙开机自动关闭
+ systemctl enable 服务名   开机自动开启服务
+  
+  
+ df -h 查看分区使用情况
+ 查看内存使用情况
+ free -m 或者free -l 均可
+ 
+ ps
+ 分出主分区后，其余的部分可以分成扩展分区
+ 扩展分区不能直接使用，必须分成若干逻辑分区，所有的逻辑分区都是扩展分区的一部分
+ 
+ 硬盘容量=主分区容量+扩展分区容量之和
+ 
+ 
+ 
+ 单位里磁盘更换详细过程，及保修流程
+ 1、确认硬盘故障后，确认硬盘型号及接口类型
+ 2、找到硬盘后除了新盘，旧盘一定要做检测
+ 
+ 
+ 
+ 【找到一台旧服务器，一般在公司】并且清楚数据，让硬盘变成ready状态，才可以发送到IDC机房。机房收到硬盘后，工程师要给现场派发工单。
+ 
+ 
+ 例如
+ 请更换硬盘
+ 亦庄4M3A机房，K3列 服务器D16  ID =2
+ 300G   
+ 现场更 换完毕后，旧的盘单独存放，定期发给相关部门进行销毁处理。。
+ 2.了解磁盘容量及型号 ---->要一一对应 。
+ 
+ 
+ 
+
+ cat head  tail more
+ 
+ >覆盖   >>追加
+ 1>正确输出
+ 2>错误输出                                                           ***
+ /dev/null   垃圾站
+ &>  无论正确与否都输出到文件、混合输出
+ 
+ 
+ 
+ 
+ raid 0    分为单盘0和raid0_single
+ 
+ raif单盘0
+   只需要一块盘，不支持容错，不提供冗余机制。
+   只用于新服务器，只有一块盘，用来安装操作系统
+   
+   raid全盘0   raid0_all
+   全盘0一个数据两个硬盘同时读写，读写速率高，但是不支持容错，
+   不提供冗余机制。，需要两块硬盘
+  
+  
+
+   
+   
+   RAID
+     RAID 0  全盘 0线性卷，一个数据两个硬盘同时读写，读写速率高，但是不支持容错，不提供冗余机制。需要2块硬盘。
+     RAID 1 镜像卷，一个数据在两块硬盘里写，空间使用为50％，支持容错。需要2块硬盘。非常重要服务的系统盘
+     RAID 5 需要3块硬盘及以上，空间使用率为2块硬盘空间。支持容错
+     RAID 10是RAID0与RAID1综合应用。
+     
+     RAID 单盘0   RAID0_single     只需要一块盘，不支持容错， 不提供冗余机制。常见于新服务器，只有一块盘，用来安装操作系统
+     RAID1+RAID5    前两块盘做RAID1 后面的盘做RAID5
+     RAID1+SSD_RAID5    前两块盘做RAID1 后面的SSD硬盘做成raid5用来存储数据
+     
+    磁盘状态 
+   online 在线
+   faild  失败（损坏）
+   ready没有加入阵列中
+   rebuilding 同步。重建
+   RPM转速
+   
+   扩展分区
+  分出主分区后，其余部分可以分撑扩展分区，一般剩下的部分全部分成扩展分区，也可以不全分，剩下部分就浪费了。
+  扩展分区不能直接使用，必须分成若干逻辑分区
+  
+  
+  
+  fdidk和gdisk的区别
+  fdisk和gdisk命令都可以给磁盘分区，但是在公司，如果磁盘大于2T，只能用gdisk命令
+  公司里使用fdisk命令最多
+ fdisk命令只可以创建四个主分区而gdisk命令可以创建128个主分区
+ 
+ lsblk 显示磁盘信息
+ fdisk  /dev/sdb  磁盘分区
+ mkfs.xfs /dev/sdb -f  强制格式化磁盘
+ blkid 显示分区格式
+
+ 文件系统只读
+ 查看/etc/fstab  根分区是否被注释  dh   -Th  查看分区类型然后进行修复 mount -o remount，rw /dev/sdb
+ 
+ 
+
+作业
+一、简述raid0和raid1 raid5的区别
+二、说说你用什么raid 为什么？
+raid0 单盘0
+   磁盘实现开机自动挂载，sd[a-p] 分别挂载在。/date[-15]上，
+   raid1+ssd_raid5 或者raid6 等大磁盘容量的机器都在应用在数据库服务器上。
+三、请说说你所知道的服务器品牌及型号及配置
+dell r730/r720
+1、英特尔®至强®处理器E5-2600 v4产品系列，最多可配24个DIMM插槽的DDR4 RAM
+最高可配16个2.5英寸硬盘：
+最高可配8个3.5英寸硬盘：
+2、机架式2U服务器，标配CPU一个，6核，最大可扩展两个， 标配8G内存，最大支持1.5 TB，24个DDR4内存插槽，标配硬盘容量1.2T，最大硬盘容量19.2T,配备一个四端口千兆网卡，双电源，风扇和硬盘、电源支持热插拔，有DVD-RW光驱,支持2008/2012,redhat等多种操作系统
+
+ 服务器品牌，型号，磁盘大小，转速 几块 内存大小  总计支持多大，几个CPU，多少核
+四、服务器高度是什么单位？U
+五.请永久修改主机名和临时修改
+
+作业
+1 编写的Shell程序运行前赋予该脚本文件（执行） 权限
+2 唯一标识每一个用户的是（用户名） 和（UID）.
+3 查看/etc/passwd  前5行和后5行 head -5 /etc/passwd   tail -5 /etc/passwd
+4 DHCP可以实现（为网络中主机自动分配IP地址）
+5 查看本机CPU的信息 ps aux --sort %cpu
+6  不使用vi编辑器，将haha 文件写入 hello world  echo "xxxx" >haha
+7 快速ping 你虚拟机网关 5000次（虚拟机网  关是X.X.X.2） ping -c 5000 -i 0.001 x.x.x.2
+8 防止/etc/sudoers  /etc/passwd 被误删除， 你有什么方法？chmod o+t /etc/sudoers /etc/passwd  chatter  +i /etc/sudoers /etc/passwd
+9 给普通用户提权，使他拥有root权限 useradd zz   vi /etc/sudoers
+10 将/etc/passwd 前10行写入当前目录下的 heihei 文件。head /etc/passed >heihei
+练习替换   g  %  s    s/a/A/ 替换第一个 s/a/A/g 替换一行  5,$/a/A/g  替换5到最后一行  %s/a/A/g  替换所有
+11 top 命令可以显示cpu 1 5 15分钟的平均负载。  请使用另外2个命令出现CPU平均负载  ps --sort -%cpu  ps -ef
+12 sgid是干嘛的？            允许用命令对文件操作
+13 服务器被入侵的症状是什么？cpu和内存占用率升高，网络慢
+14 创建一个名字是当前日期的文件 touch `date   +%Y-%m-%d`
+15 查看当前系统时间 date
+16 创建/tmp/haha 文件  修改文件的属主为 alice  属组为hr    chown alice /tmp/haha  chgrp hr  /tmp/haha
+17 将 tom用户加到 hr组里 groupadd hr  useradd tom -G hr
+18 修改/tmp/haha 权限为    读写执行   读   没权限 chmod 740 /tmp/haha
+19 * 都有什么意思？ 通配符，文件名，目录名
+20  显示当前目录下隐藏文件 ll -a
+21  本机执行过的命令存在哪个文件中？？  ~/.bash_history
+22 创建一个文件 /tmp/gongzi.txt 要求：此文件属于RS组，并且只有root和组成员能够读写执行  touch /tmp/gongzi.txt  chgrp RS /tmp/gongzi.txt chmod 770 /tmp/gongzi.txt
+23 修改/tmp/shebei.txt权限为755   chmod 755
+24 查看本机的IP地址  直接过滤出 IP所在行 ip a|grep /24 过滤掩码
+25 还有什么命令可以查看IP地址
+26  格式化分区用什么命令？ mkfs.格式 /dev/sd*
+27 磁盘容量怎么算？ 主分区+拓展分区（所有逻辑分区）
+28 做raid的时候按什么按键进入raid卡？ ctrl+r
+29  说出你所知道的查看进程的命令？ps aux,ps --sort %cpu/mem,top,ps -ef
+30 说出你所知道的linux命令
+
+
+第二周
+
+
+DAY1软硬链接PV VG LV
+简单介绍一下linux文件系统
+说说ext4文件系统和xfs文件系统的区别
+linux操作系统支持很多不同的文件系统，如ext4,xfs，fat
+linux以文件的形式对计算机中的数据及资源进行管理，一切皆文件
+ext4支持度广，但是创建文件系统慢，修复慢。
+xfs文件系统。高容量。，支持大存储，高性能
+inode是需要用到时，才动态产生。
+
+
+软（符号链接）硬链接区别
+
+硬链接不会创建新的inode只给源文件多加一个文件名字，软连接新建新的inode
+相当于重新创建一个文件
+硬链接不能跨分区，软链接可以跨分区
+硬链接删除源文件后，另一个文件能用
+软链接删除后，链接文件不能用
+ln -s 软链接   ln硬链接
+3.链接分为什么
+
+
+swap分区
+linux系统中，一般都会有swap内存，你觉得使用swap内存有什么好处，swap内存
+会被使用么？生产中要不要使用swap内存？
+swap好处是防止内存溢出，当内存不够使用时
+生产环境中需要使用swap内存，防止OOM out of menory
+
+
+linux系统开始启动过程
+1、加电
+2、加载BIOS设置
+3、加载grub
+4、加载内核系统到内存中
+5、加载配置文件
+6、加载内核模块
+7、完成相应的初始化工作和启动相应服务
+8、启动系统进程
+9、出现登录界面
+10、开机启动完成
+
+which  reboot  查看命令文件
+/etc/rc.local 开机自动加载命令或脚本   给文件执行权限
+/etc/fstab 开机自动挂载磁盘
+
+df  -Th 查看文件系统
+fdisk /dev/sdx
+永久挂载步骤
+  0 0 不备份 不检测
+ 1、确定磁盘UUID
+ 2、进入/etc/fstab
+ 3、mount -a
+ 4、lsblk
+
+
+数据迁移
+pv不可以跨越vg
+lv不能跨越vg
+系统可以创建多个vg
+vg中可以创建lv
+
+步骤
+1、mount /dev/datevg/lv1  /mnt/lv1    取消挂载
+2、lvremove lv1                            移除lv
+3、vgremove vg                           移除pv
+4、pvcreat /dev/sde                     创建pv
+5、vgextend  vg  /dev/sde           加入vg
+6、pvmove /dev/sdb /dev/sdc    将sdb数据迁移sdc    
+7、vgreduce datevg /dev/sdb    卸载sdb
+lvcreate date  -L 4G -n lv1    vg=date -L 大小 -n lv名称
+扩容lv
+pvcreat /dev/sde                创建pv
+vgextend  vg  /dev/sde        pv加入vg
+lvextend -L 10G /dev/vg/lv   扩容lv 
+xfs_growfs /dev/centos/root 
+
+
+df -T
+ xfs_growfs /dev/centos/root 
+ df -Th
+ lvextend -L +5G /dev/centos/root 
+ xfs_growfs /dev/centos/root 
+ df -h
+ https://jingyan.baidu.com/article/a3aad71af9409fb1fb009636.html
+
+
+
+
+作业
+一、说说centos默认文件系统是什么？
+二、请问安装linux操作系统必须要有的分区分别是什么
+/
+/boot  引导分区
+/swap  交换分区
+
+DAY2 FIND XARGS
+
+ 
+ 文件系统修复
+ ext4   文件系统修复
+ fsck -y /dev /sda2
+ 
+ xfs     文件系统修复
+ xfs_repaire  /dev /sda2
+ 
+ 
+ 
+ 
+ 修改当前系统时间 月 日 时分
+ date 11111111
+ 
+ find
+ 
+ 按文件名：
+ find / -name "ifcfg-enf33"     查找文件
+ find / -iname "file1"            -i 忽略大小写查找文件
+ 按文件大小：
+ find / -size +5M                大于5M
+ 指定查找的目录深度：
+find /etc/ -maxdepth 2 -a -name "ifcfg-ens33"    -a 并且   -maxdepth 2 目录深度
+find /tmp/ -empty              找出目录下的空文件
+按文件类型：
+find /tmp/ -type d          d目录
+ find /tmp/ -type  -f        f文件
+find /tmp/ -type f |wc -l  查看目录下文件的数量
+find /tmp/ -type d |wc -l  查看目录下目录的数量
+按文件权限：
+find . -perm 644  . 当前目录 查找权限644的文件或者目录
+find . -perm -644    包含644权限的文件或者目录
+按时间查找
+find /etc -mtime +5					    //修改时间超过5天
+find /etc -mtime 5						//修改时间等于5天
+find /etc -mtime -5					    //修改时间5天以内
+
+find /tmp/ -name "1file" -o -name "5file"    -o 或者
+find /tmp/ ! -name "1file"   ！取反 非
+|wc -l 统计 
+ 
+原理   
+ xargs命令用于调用并执行指令的命令
+  find /etc -iname "ifcfg*" |xargs -I {} cp -rf {} /tmp
+ exec命令用于调用并执的命令
+ find /etc -name "ifcfg*" -exec cp -rvf {} /tmp \;
+
+scp /tmp/1.txt 10.0.120.120:/   把本机tmp下的1.txt复制到120的/下
+scp -r /tmp 10.0.120.120:/   把本机tmp文件夹复制到120的/下
+
+scp 10.0.120.120:/tmp/1.txt  / 把120机器tmp下的1.txt复制到本机/下
+ 
+
+作业
+1、标准端口范围
+1-65535
+2、性能测试用过什么
+对磁盘IO进行检测测试  用top命令  cpu的平均负载
+dd if=/dev/zero of=test  bs=1M count=10
+3、找出/home 下所有7天前以ok结尾的文件
+ --------+-------7----（-） -----now
+ 4、统计/var/log下文件的个数，提示 wc   find /var/log/ -type f|wc -l
+ 5、查找后缀名字是*.log的文件并删除  find / -name "*.log" -exec rm -rf {} \;
+ 7、开机自动创建一个以当前时间.txt命名的文件，在/tmp下
+ 8、快速生成一个1G大小的文件
+ 9.请将本机器所有樱桃树笔记备份到/tmp下
+ 10.请删除当前目录下所有.log结尾的文件
+ 11 查找出在/tmp下所有的.txt结尾的文件
+ 12 查找出来文件大小是5M的文件
+
+DAY4 YUM TAR
+解压缩
+
+打包
+ tar -czf xx.tar.gz  /etc/
+ 解压
+ tar -xf xx..tar.gz /etc/   -C 解压到指定路径
+  
+  zip
+  unzip
+  
+  
+  yum
+  安装源
+  /etc/yum.repos.d
+  /etc/yum.repos.d/CentOS-Base.repo 基础源    去掉#
+  yum -y install  epel-release 扩展源                 去掉#
+清除缓存。安装缓存
+   yum clean all
+   yum makecache
+
+yun -y remove lsof
+yum -y install
+yum -y remove 
+yum -y reinstall
+
+
+yum provides pip  查找包
+yum -y install lsof-4.87-6.el7.x86_64  安装包
+
+
+
+
+2. 安装源码包
+准备工作
+
+部署Tengine
+# yum -y install gcc make zlib-devel pcre pcre-devel openssl-devel
+1.找包 上传  确定源
+./configure --prefic=/usr/local/httpd -- with-xxx=/usr/local/xx --with-000=/usr/lib
+2.环境   bash epel  yum clean'    makecache
+3.配置指定路径
+4.make &&make install
+5.启动 -s stop 停止
+
+
+./configure --prefix=/usr/local/httpd -- with-xxx=/usr/local/xxx --with-000=/usr/local/000
+  
+
+DAY5 RPM 计划任务 日志
+在企业安装新操作系统之后都做什么？做安全加固么
+
+1、防火墙只开放对外的服务端口
+2、禁止root远程登录
+3、修改/etc/passwd访问权限及属性
+4、修改SSHD的服务端口
+5、禁止不用的服务和应用
+6、经常检查系统日志
+7、执行初始化脚本，实现杀毒软甲的安装及ntp的校时，开机挂载磁盘等等
+8、修改yum源
+9、添加账户
+
+yum和rpm命令的区别，如果使用rpm安装一个依赖的包，
+区别：rpm命令安装时。不检查软件包的依赖性问题，yum命令安装时，可自动处理依赖关系，并且一次安装所有依赖包
+rpm安装一个有依赖的包，先使用rpm安装这个有依赖的包，按照错误提示，缺少哪个包，要先安装缺少的包。依赖包安装完事后，在安装此包
+
+
+rpm
+rpm -ivh  安装
+ rpm -e ntfs-3g  卸载 --nodeps  不检测依赖关系卸载 --force 强制安装依赖软件包
+rpm -ql ntfs-3g   查询安装路径
+rpm -q  nefs-3g  查询是否安装   
+
+计划任务
+crontab -e 开启
+             -r 关闭
+            
+tailf=tail -f
+
+
+logrotate日志轮转
+ vi /etc/logrotate.d/yum 
+ ls /var/log/yum*
+/usr/sbin/logrotate /etc/logrotate.conf 
+
+# tail /var/log/messages		                //系统主日志文件
+# tail -20 /var/log/messages
+# tail -f /var/log/messages		        	//动态查看日志文件的尾部
+# tailf /var/log/secure		            	    //认证、安全
+# tail /var/log/maillog			              	//跟邮件postfix相关
+# tail /var/log/cron			                  	//crond、at进程产生的日志
+# tail /var/log/dmesg			              	//和系统启动相关
+# tail /var/log/audit/audit.log       		    //系统审计日志
+# tail /var/log/yum.log                          //yum
+# tail /var/log/mysqld.log                      //MySQL
+# tail /var/log/xferlog                  		   //和访问FTP服务器相关
+# w					                                   //当前登录的用户 /var/log/wtmp
+# last					                               //最近登录的用户 /var/log/btmp
+# lastlog					                           //所有用户的登录情况 /var/log/lastlog
+主配置文件
+vim /etc/logrotate.conf	
+=========全局设置==========
+weekly     			                  	     //轮转的周期，一周轮转
+rotate 4				                         //保留4份
+create				                      	 //轮转后创建新文件
+dateext                           			 //使用日期作为后缀
+#compress			                	 //是否压缩
+include /etc/logrotate.d  			 //包含该目录下的文件
+
+
+    monthly			                	     //一月轮转一次
+    minsize 1M			            	 //最小达到1M才轮转
+    create 0664 root utmp		     //轮转后创建新文件，并设置权限
+    rotate 1			                  	     //保留一份
+
+    missingok			              		//丢失不提示
+    monthly			                	    //每月轮转一次
+    create 0600 root utmp		    //轮转后创建新文件，并设置权限
+    rotate 1			                  	    //保留一份
+
+
+
+例1：轮转文件/var/log/yum.log
+# vim /etc/logrotate.d/yum  	    
+/var/log/yum.log {
+       missingok                                丢失不提醒
+#    notifempty                                空文件不轮转
+#    size 30k
+#    yearly
+      daily                                       每天轮转一次
+      rotate 3
+      create 0777 root root
+}
+/usr/sbin/logrotate /etc/logrotate.conf	  //手动轮转
+ ls /var/log/yum*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+作业
+1、请升级本机php版本（1、提示卸载了重新安装2、yum update）查看版本
+2、安装linux杀毒软件 epel
+yum -y install epel-release
+# yum -y install clamav
+
+3、请校对时间 和中国时间同步
+ntpdate ntp1.aliyun.com
+4、把httpd服务设置开机启动
+
+1 计划任务在11月份，每天早晨6点到12点中，每隔2小时执行一次/usr/bin/httpd.sh  怎么实现？
+ 00 6-12/2  * 11 *    /usr/bin/httpd.sh
+脚本想要执行 必须要有执行权限
+chmod +x  /usr/bin/httpd.sh
+
+2每天07-23点，每隔半小时执行apache重启（yum安装的）
+3 每个星期天早八点 定时重启服务器
+4 /var/www/html是网站发布目录，如何每天凌晨0点30 分对其自动备份（ 压缩了不就好喽）
+
+5 凌晨1点59分删除 /bt目录下全部子目录，和子文件
+6 每隔两小时执行/data/scripts/back.sh脚本
+7.计划每星期五早11点29分服务器定时重启，如何实现？ 
+8. 每两分钟执行时间同步。   ntp
+9.查找出网卡配置文件，然后备份到/tmp下
+ifcfg-ens33  ifcfg-*
+10 查找出/tmp下所有.txt结尾的文件并且删除   （文件自己touch,别给我要）
+12 查找出当前目录下的所有file开头的文件，并且移动到/tmp 下
+
+
+00  6-12/2 * 11 * /usr/bin/sh /usr/bin/httpd.sh
+*/30  07-23 * * * /usr/bin/systemctl restart httpd
+00 08 * * 7 /usr/sbin/reboot
+30 0 * * * /usr/bin/tar -czf /var/www/html /tmp
+59 1 * * * /usr/bin/rm -rf /bt/*
+*  */2 * * * /usr/bin/sh /date/scrips/backsh
+29 11 * * 5 /usr/bin/reboot
+*/2 * * * * /usr/bin/netdate ntp1.aliyun.com
+* */12 * * /usr/bin/tar -czf /etc/sysconfig/network-script/ifcfg* -C /tmp
+* * * * * /usr/bin/find -name "*.txt" -exec rm -rf  {}\;
+
+* * * * * /usr/bin/find -name "file*" -exec mv  {}/tmp \;
+
+
+
+
+
+
+du -sh *查看当前目录下各个文件及目录占用空间大小
+
+
+
+df -h和du -sh显示的磁盘大小不一致原因及解决办法
+df -hT显示132G空间全部占用，du -sh显示只占用30G
+
+问题原因
+使用rm命令删除文件时，只有当该文件不存在任何link才会被删除 
+当有进程访问这个文件时,这个文件的实际占用空间就不会释放 
+du是根据文件名进行的空间统计，使用rm时该文件对系统来说已经不可见，所以不会统计这个文件。 
+df则是磁盘实际占用的数量
+
+解决方法
+使用lsof|grep delete命令查看正在使用的已删除的文件，发现存在多个这样的文件，kill掉进程，文件删除成功
+
+第三周
+
+
+DAY1 BOND 子接口
+1 A -->B机器的免密登录
+ssh-keygen  生成秘钥对
+ /root/.ssh/     id_rsa  id_rsa.pub 
+ssh-copy-id -i 10.0.120.76  
+
+2 网卡配置文件的动静转换及修改配置文件
+  /etc/sysconfig/network-scripts/ifcfg-ens33
+
+3 配置bond （双内网）
+在公司中网卡配置文件修改之前，一定要备份。
+
+1、配置两个网卡，新建bond文件，
+2、bonding参数
+tail -2 /etc/modprobe.d/bond0.conf 
+alias  bond0 bonding
+options bonding mode=0 miimon=100
+重启网络服务
+4 配置网卡的子接口
+ifcfg-ens33:0  添加IP。重启服务
+5 bond和子接口的区别
+6 查看网卡协商速率
+ 查看ethtool 网卡速率   Link detected: yes   检测服务器网线是否连接
+7 修改网卡名称 ens33 --->eth0
+
+
+mv ifcfg-ens33  ifcfg-eth0         #重命名网卡
+
+vi /etc/sysconfig/grub
+GRUB_CMDLINE_LINUX="crashkernel=auto rhgb net.ifnames=0 biosdevname=0 quiet"     ##重新加载grub
+
+grub2-mkconfig -o /boot/grub2/grub.cfg   #生成启动菜单
+
+reboot
+
+
+
+了解网卡乱序
+如果发现内外网都不同。但是系统里网路都正常，这时候确认是不是网卡乱序了。
+解决办法：在网卡配置文件里写出MAC地址
+mac地址怎么看？重启机器，在bios里面看
+网卡的mac拍照。然后手动写入网卡配置文件
+
+
+作业
+一、mtime、atime、ctime区别
+访问时间：atime，查看内容                     //RHEL6会延后修改atime
+修改时间：mtime，修改内容
+改变时间：ctime，文件属性，比如权限
+删除时间：dtime，文件被删除的时间
+
+
+
+
+DAY2 NFS FTP DNS
+1、NFS是干嘛的？什么技术。遇到什么问题
+用NFS做nas存储。当用户访问过多的时候会卡，提升交换机配置，或将百兆提升到千兆万兆，或者将NFS服务器配置bond
+或者进行网络优化
+
+
+ 关闭防火墙和selinux
+NFS文件共享存储步骤
+一、nas（存储端）
+• 1.安装软件
+      •  yum -y install nfs-utils（主包提供文件系统）
+      •   yum -y install rpcbind（提供rpc协议）
+• 2.启动服务------>这两个服务必须同时启用
+      •   systemctl start nfs
+      •   systemctl start rpcbind   
+• 3.新建网站代码
+         • mkdir /webdata  
+         •  echo "nfs test..." > /webdata/index.html  
+• vim /etc/exports
+•  /webdata        10.214.120.0/24(rw,sync,no_root_squash)
+• 4.systemctl restart nfs-server
+• 5.exportfs -v
+   ◇ /webdata      	192.168.122.0/24(rw,wdelay,no_root_squash,no_subtree_check,sec=sys,rw,secure,no_root_squash,no_all_squash) 不压制root
+二、web  客户端
+1.yum -y install nfs-utils httpd
+  systemctl start httpd
+ systemctl enable httpd
+ 1. 查看存储端共享 [可选]
+showmount -e IP
+Export list for nas:
+/webdata 192.168.122.0/24
+2. 手动挂载
+ mount -t nfs IP:/webdata /var/www/html/
+ umount /var/www/html/
+
+3. 自动挂载
+ vim /etc/fstab
+IP/webdata      /var/www/html           nfs     defaults        0 0
+ mount -a
+4. 查看挂载
+ df -Th
+IP:/webdata     7923136 692416   6821568  10% /var/www/html
+ ls /var/www/html/
+index.html
+
+2、怎么理解存储
+存储就是根据不同的应用环境，通过采取合理，安全有效的方式将数据保存在某些物质上，并保证有效的访问，它是数据临时或者长期驻留的物理媒介，保证数据的完整性安全存放的行为和方式
+
+打DF- H直接卡死，就是挂载的问题，查看nfs挂载
+
+3、简述非对称加密算法工作过程
+1.乙方生成两把秘钥
+2.甲方获取乙方的公钥，然后对它进行加密
+3.乙方得到加密信息后，用私钥解密
+4.甲方获取乙方的私钥加密数据，用公钥解密
+
+FTP的两种工作模式
+主动模式端口20  被动模式21
+ lftp 客户端   vsftpd服务端
+ get 1.txt -o /      下载到指定目录
+ mirror  目录          下载目录
+  vi /etc/vsftpd/vsftpd.conf  主配置文件
+  get  下载  put 上传
+ 创建共享目录  /var/FTP/   
+ 
+ 
+   
+匿名上传文件
+
+anon_upload_enable 创建文件，不能创建目录 （只能上传文件，默认关闭）
+anon_mkdir_write_enable  可以创建目录（默认关闭）
+anon_other_write_enable  删除或修改文件或目录需要开启（默认关闭）
+chown 777  /var/ftp/上传的目录
+DNS解析流程
+当用户在浏览器输入一个网站，说说计算机对DNS解析结果流程，注：本机跟本地的DNS没有缓存。
+1用户输入网址到浏览器
+2浏览器发出dns请求
+3计算机首选查询本机host文件，不存在，继续下一步
+4计算机按照本地DNS的顺序，向区域DNS服务器查询IP结果，如果区域DNS服务器查询不到，会从根域开始。
+5将返回dns结果给本地DNS和主机，本机和本地DNS并缓存本结果，直到TTL过期，才再次查询此结果；
+6返回IP结果给浏览器，并给本地DNS一份结果；
+7浏览器根据IP信息获取页面。
+vi /etc/resolv.conf   nameserver 8.8.8.8
+
+vi/etc/rc.local开机自动执行脚本或者命令^C
+vi/etc/fstab 开机自动挂载文件系统C
+vi/etc/resolv.conf dns写入地址的文件C
+vi/etc/hostname 主机名称修改
+
+作业
+dns都有哪些记录
+
+NFS端配置
+
+首先配置好基础源和扩展源
+一、关闭防火墙和selinux
+   
+二、安装软件包
+     
+     出现 nothing to do 即已经安装
+三、启动服务
+     
+四、建立共享目录
+     
+      
+      把网站代码上传到需要共享的目录就可以，我这里就随便写了个主页。
+五、进入配置文件
+    
+    
+    文件里写入共享路径和IP网段  括号内复制就ok
+六、重启服务
+    
+七、查看共享
+     
+     
+     有共享目录和IP地址即可。NFS端配置完毕。
+
+WEB端配置
+
+首先配置好基础源和扩展源
+一、关闭防火墙和selinux
+   
+二、安装软件包
+     
+     
+三、启动服务
+      
+     
+四、查看存储端共享 [可选]
+     
+     
+      
+五、临时手动挂载（实验用）
+      
+     
+六、开机自动挂载（工作用）
+    
+    10.0.120.18/web      /var/www/html           nfs     defaults        0 0
+    进入文件，按照格式写入即可
+七、查看挂载
+      
+八 、重启http服务然后打开浏览器输入IP地址查看即可。   
+     
+     
+
+DAY3 HTTP DNS 数据库
+
+我们都知道DNS既采取了TCP协议，又采取了UDP协议，什么时候采取TCP协议？什么时候采取UDP协议？为什么要这么设计？
+a什么是TCP协议？b什么是UDP协议ctcp和UDP有什么区别？
+
+DNS有两种情况，一种是区域传输，一种是域名解析
+1区域传输时，一个区中主DNS服务器从自己本身机器的数据文件中读取DNS数据信息，而辅助DNS服务器则从主DNS服务器中读取该区的DNS数据信息，传输协议是TCP
+2域名解析时，首选的通讯协议是UDP使用UDP传输，不经过三次握手，这样DNS服务器负载更低，响应更快。
+但是当域名解析反馈长度超过512字节，将不能使用UDP协议进行解析，此时必须使用TCP
+
+HTTP有两个常用版本，分别是HTTP1.0和HTTP1.1。主要区别在于HTTP1.0中每次请求和应答都会使用一个新的TCP连接，而从HTTP1.1开始，减少了TCP连接的建立和断开，提高了效率。
+curl  curl -I
+常见的HTTP相应状态码
+200：请求被正常处理
+204：请求被受理但没有资源可以返回
+206：客户端只是请求资源的一部分，服务器只对请求的部分资源执行GET方法，相应报文中通过Content-Range指定范围的资源。
+301：永久性重定向
+302：临时重定向
+303：与302状态码有相似功能，只是它希望客户端在请求一个URI的时候，能通过GET方法重定向到另一URI上
+304：发送附带条件的请求时，条件不满足时返回，与重定向无关
+307：临时重定向，302类似，只是强制要求使用POST方法
+400：请求报文语法有误，服务器无法识别
+401：请求需要认证
+403：请求的对应资源禁止被访问
+404：服务器无法找到对应资源
+500：服务器内部错误
+503：服务器正忙
+
+
+
+systemctl restart mariadb    重启数据库
+mysqladmin -uroot password   设置数据库密码
+ mysql -uroot -p123         进入数据库
+ show databases;           查看数据库
+  create database zx;      创建数据库
+systemctl restart httpd   启动httpd服务
+vi /etc/httpd/conf.d/zx.conf  apache虚拟主机配置文件    /var/www/html
+cp -rf wordpress/*  /web/zx/  拷贝网站文件
+chmod -R 777 /web/       加权限
+
+/etc/httpd/conf/httpd.conf   apache 主配置文件
+ 中间件
+ 
+
+
+
+隐藏版本
+nginx 隐藏版本信息
+
+首先 curl --head http://39.100.64.26
+
+
+
+修改配置文件
+[root@zhaohan nginx]# pwd
+/etc/nginx
+[root@zhaohan nginx]# vi nginx.conf
+
+
+
+
+加入此字段，然后重启服务，继续curl查看
+
+
+
+
+###################################################################################
+apache 隐藏版本号
+
+
+
+vi /etc/httpd/conf/httpd.conf 
+在文件的最后一行加入
+
+
+
+重启服务 systemctl restart httpd
+
+
+
+
+版本信息隐藏
+
+
+DAY4 COOKIE和SESSION
+删除数据库
+
+
+
+Cookie和Session的区别
+HTTP 是一种无状态的连接，客户端每次读取web页面时，服务器都会认为这是一次新的会话。但有时候我们又需要持久保持某些信息，比如登录时的用户名、密码，用户上一次连接时的信息等。这些信息就由 Cookie和Session保存。
+Cookie cookie实际上是一小段文本信息。客户端请求服务器，如果服务器需要记录该用户状态，就使用response向客户端浏览器颁发一个cookie，客户端浏览器会把cookie保存起来，当浏览器再次请求访问该网站时，浏览器把请求的网站连同该cookie一同提交给服务器，服务器检查该cookie，以此来辨认用户状态。
+简单来说，cookie的工作原理可总结如下：
+1，client连接server
+2，client生成cookie（有效期），再次访问时携带cookie
+3，server根据cookie的信息识别用户身份Session Session是服务器端使用的一种记录客户端状态的机制，使用上比Co okie简单一些。同一个客户端每次和服务端交互时，不需要每次都传回所有的Cookie值，而是只要传回一个ID，这个ID是客户端第一次访问服务器的时候生成的，而且每个客户端是唯一的。这样每个客户端就有了一个唯一的ID，客户端只要传回这个ID就行了，这个ID通常是name为SESSIONID的一个Cookie。Sess ion依据这个id来识别是否为同一用户（只认ID不认人）。
+cookie和Session区别：
+cookie数据存放在客户的浏览器上，session数据放在服务器上。
+cookie不是很安全，别人可以分析存放在本地的COOKIE并进行COOKI E欺骗。考虑到安全应当使用session。
+session会在一定时间内保存在服务器上。当访问增多，会比较占用。
+你服务器的性能考虑到减轻服务器性能方面，应当使用COOKIE
+
+
+
+yum -y install net-tools
+ netstat -tnlp |grep ssh   查看端口
+  du -sh
+apache的工作模式？介绍下特点，说明什么情况下采取不同的工作模式？
+apache 3种工作模式，分别是prefork  worker event
+1 prefork 是一种进程，进程去请求处理，容易消耗内存但是稳定。某个进程出现问题不会影响其他请求，要求稳定时候使用
+2 worker 使用多个子进程，每个子进程有多个线程，使用线程去处理请求，消耗内存小
+稳定不好，  在访问量多的时候使用
+3 event 为了解决keep-alive 保持长连接工作模式， 不支持用在https
+
+作业
+
+
+DAY5
+
+
+WIKI
+
+    防火墙和策略 一定要关闭
+1、上传jdk包，并且解压到本地目录（XFTP）
+2、更改环境变量
+   vi /etc/profile
+JAVA_HOME=jdk解压路径
+CLASSPATH=.:$JAVA_HOME/lib/tools.jar
+PATH=$JAVA_HOME/bin:$PATH
+export JAVA_HOME CLASSPATH PATH
+source /etc/profile
+3.验证java环境   java -version  
+4.安装yum  环境 yum install  mariadb mariadb-server mysql-connector-java  mariadb-client mariadb-devel 、
+5.配置数据库
+systemctl restart mariadb
+mysqladmin -utoor password
+mysql -uroot -p123
+show databases;
+create database confluence;
+GRANT ALL PRIVILEGES ON 数据库名字.* TO'库管理员账户'@'%'IDENTIFIED BY'密码';
+FLUSH PRIVILEGES;   刷新
+exit
+systemctl restart mariadb   重启
+6.重启数据库
+
+
+7.安装解压 confluence5.6.6 .zip    
+8.加权限  777或者+x    然后./执行  安装
+atlassian-confluence-5.6.6-x64.bin     
+安装完成启动浏览器
+9.访问ip加端口 
+10.复制server ID    关闭confluence服务
+   命令：service confluence stop
+11、删除confluence安装生成的jar包
+rm -fr /opt/atlassian/confluence/confluence/WEB-INF/lib/atlassian-extras-*
+12.导入破解包到上述的lib目录解压破解包，
+/tmp/confluence5.6.6-crack/jar
+cp -rvf jar/* /opt/atlassian/confluence/confluence/WEB-INF/lib/
+
+13.启动服务 service confluence start
+
+
+JIRA
+防火墙和策略 一定要关闭
+
+上传安装包
+
+1   重启数据库  systemctl restart mariadb
+2、进入数据库 mysql -uroot -p123
+2、新建jira库 create database jira;
+3.加权限 
+grant all privileges on 数据库名字.* to '用户名'@'%' identified by '数据库密码';
+ 
+4.刷新库   FLUSH PRIVILEGES; 刷新
+5、重启库
+
+6.chmod 777 +x /root/a~~~~  给脚本加权限
+7./a~~~~  执行脚本
+8.unzip jira.7.3   解压jira
+9. 复制破解文件  cp -f jira7.3/*  /opt/atlassian/jira/atlassian-jira/WEB-INF/lib/
+10.   开启jira服务     /opt/atlassian/jira/bin/start-jira.sh
+11.打开网站    一顿下一步
+
+ZABBIX
+
+1、介绍
+
+Zabbix是一个基于WEB界面的提供分布式系统监控的企业级的开源解决方案，Zabbix能监视各种网络参数，系统硬件参数，保证服务器系统安全稳定的运行，并提供灵活的通知机制以让管理员快速定位并解决存在的各种问题。
+
+1.4 监控概念
+
+Zabbix监控系统包括很多监控概念，如下为Zabbix常用术语及解释：
+
+主机（host）：	被监控的网络设备，可以写IP或者DNS；
+主机组（host group）：	主机组用于管理主机，可以批量设置权限；
+监控项（item）：	具体监控项，items值由独立的keys进行识别；
+触发器（trigger）： 为某个items设置触发器，达到触发器会执行action动作；
+事件（event）： 例如达到某个触发器，称之为一个事件；
+动作（action）： 对于特定事件事先定义的处理方法，默认可以发送信息及发送命令；
+报警升级（escalation）： 发送警报或执行远程命令的自定义方案，如隔5分钟发送一次警报，共发送5次等。
+媒介（media）： 发送通知的方式，可以支持Mail、SMS、Scripts等；
+通知（notification）： 通过设置的媒介向用户发送的有关某事件的信息；
+远程命令 达到触发器，可以在被监控端执行命令；
+模板（template）： 可以快速监控被监控端，模块包含：item、trigger、graph、screen、application；
+web场景（web scennario）用于检测web站点可用性，监控HTTP关键词；
+web前端（frontend）： Zabbix的web接口；
+图形（graph）	监控图像；
+屏幕（screens）	屏幕显示；
+幻灯（slide show）	幻灯显示。
+
+2、Zabbix平台构建（yum方式）
+
+2.1 部署lamp环境
+
+2.1.1 yum安装
+
+yum install -y httpd httpd-devel mariadb mariadb-server mariadb-devel php php-mysql php-devel
+
+2.1.2 配置zabbix虚拟主机
+
+yum install -y zabbix40-web zabbix40-web-mysql.noarch 
+
+#修改配置文件
+vim /etc/httpd/conf.d/zabbix.conf
+#开头添加以下三行
+<virtualHost *:80> 
+servername blog.zabbix.com 
+documentroot /usr/share/zabbix
+
+ # 修改时区        
+ php_value date.timezone Asia/Shanghai
+
+# 尾部添加闭合标签 
+</virtualHost>
+
+2.1.3 配置数据库
+
+[root@localhost /]# systemctl restart mariadb
+
+
+MariaDB [(none)]> create database zabbix charset utf8;
+Query OK, 1 row affected (0.00 sec)
+
+MariaDB [(none)]> grant all on zabbix.* to "zabbix"@localhost identified by "123456";
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [(none)]> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+
+2.1.4 导入zabbix初始数据
+
+[root@localhost /]# yum install -y zabbix40-dbfiles-mysql
+[root@localhost /]# mysql -uzabbix -p123456 zabbix < /usr/share/zabbix-mysql/schema.sql
+[root@localhost /]# mysql -uzabbix -p123456 zabbix < /usr/share/zabbix-mysql/images.sql
+[root@localhost /]# mysql -uzabbix -p123456 zabbix < /usr/share/zabbix-mysql/data.sql
+
+2.1.5 启动apache访问
+
+[root@localhost /]# apachectl start
+
+浏览器访问
+
+
+
+2.2 部署zabbix-server
+
+[root@localhost /]# yum install zabbix40-server zabbix40-server-mysql -y
+[root@localhost /]# vim /etc/zabbix/zabbix_server.conf 
+
+# 指定数据库主机： 
+DBHost=localhost 
+ # 指定密码 
+ DBPassword=123456 
+
+启动zabbix-server
+
+[root@localhost /]# systemctl start zabbix-server
+
+刷新页面
+
+
+2.3 添加监控主机
+
+在另一台机器部署agent
+
+[root@localhost ~]# yum install zabbix40-agent -y
+[root@localhost ~]# vim /etc/zabbix/zabbix_agentd.conf 
+
+#指定数据要发送到的server端ip
+Server=10.0.0.150
+#关闭主动模式
+#ServerActive=127.0.0.1
+#自己的ip
+Hostname=10.0.0.149
+
+启动zabbix-agent
+
+[root@localhost ~]# systemctl start zabbix-agent
+
+配置监控主机及监控项
+
+
+
+查看监控数据
+
+————————————————
+
+原文链接：https://blog.csdn.net/weixin_42440154/article/details/103902001
+
+各个WEB服务隐藏版本号
+
+nginx 隐藏版本信息
+
+首先 curl --head http://39.100.64.26
+
+
+
+修改配置文件
+[root@zhaohan nginx]# pwd
+/etc/nginx
+[root@zhaohan nginx]# vi nginx.conf
+
+
+
+
+加入此字段，然后重启服务，继续curl查看
+
+
+
+
+###################################################################################
+apache 隐藏版本号
+
+
+
+vi /etc/httpd/conf/httpd.conf 
+在文件的最后一行加入
+
+
+
+重启服务 systemctl restart httpd
+
+
+
+
+版本信息隐藏
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
